@@ -7,7 +7,6 @@ var winston = require('winston');
 require('winston-papertrail').Papertrail;
 
 var restApis;
-var transports = {};
 
 // Handler function
 exports.handler = function(event, context, callback){
@@ -45,7 +44,6 @@ function constructTransport(event, callback){
 
     // Construct the program name from the log group name
     var program = data.logGroup.split("_").splice(1).join("_").split("/");
-    var hostname = "API-Gateway_" + data.owner + "_" + process.env.AWS_REGION;
 
     // If possible, replace the api ID with it's name
     if(restApis && restApis[program[0]])
@@ -53,29 +51,16 @@ function constructTransport(event, callback){
 
     program = program.join("_");
 
-    // Build a dictionary of hostname and programs
-    if(!(hostname in transports)){
-      transports[hostname] = {};
-    }
-
-    var papertrail;
-    if(program in transports[hostname]){
-      papertrail = transports[hostname][program]
-    }else{
-      // Construct the winston transport for forwarding lambda logs to papertrail
-      papertrail = new winston.transports.Papertrail({
-        host: config.host,
-        port: config.port,
-        hostname: hostname,
-        program: program,
-        logFormat: function(level, message){
-          return message;
-        }
-      });
-      // Store the transport globally
-      transports[hostname][program] = papertrail
-    }
-
+    // Construct the winston transport for forwarding lambda logs to papertrail
+    var papertrail = new winston.transports.Papertrail({
+      host: config.host,
+      port: config.port,
+      hostname: "API-Gateway_" + data.owner + "_" + process.env.AWS_REGION,
+      program: program,
+      logFormat: function(level, message){
+        return message;
+      }
+    });
     // post the logs
     logger.post(data, papertrail, callback);
   });
