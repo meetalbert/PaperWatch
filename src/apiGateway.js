@@ -53,6 +53,7 @@ function constructTransport(event, callback){
 
     program = program.join("_");
 
+    // Build a dictionary of hostname and programs
     if(!(hostname in transports)){
       transports[hostname] = {};
     }
@@ -71,6 +72,8 @@ function constructTransport(event, callback){
           return message;
         }
       });
+      // Store the transport globally
+      transports[hostname][program] = papertrail
     }
 
     // post the logs

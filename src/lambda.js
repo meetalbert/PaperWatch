@@ -17,6 +17,7 @@ exports.handler = function(event, context, callback){
     var hostname = "Lambda_" + data.owner + "_" + process.env.AWS_REGION;
     var program = data.logGroup.split('/').pop();
 
+    // Build a dictionary of hostname and programs
     if(!(hostname in transports)){
       transports[hostname] = {};
     }
@@ -36,6 +37,8 @@ exports.handler = function(event, context, callback){
           return message;
         }
       });
+      // Store the transport globally
+      transports[hostname][program] = papertrail
     }
     // post the logs
     logger.post(data, papertrail, callback);
